@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<title>Royal Neon Casino — Demo</title>
+
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        ♛ ROYAL NEON
+    </div>
+
+    <div>
+        <span class="balance">
+            🪙 <span id="balance">10000</span>
+        </span>
+
+        <button
+            class="sound"
+            id="soundButton"
+            onclick="toggleSound()">
+            🔊
+        </button>
+    </div>
+
+</header>
+
+
+<main>
+
+<section class="hero">
+
+    <h1>ROYAL NEON</h1>
+
+    <p>
+        Casino Demo • Virtual Credits
+    </p>
+
+</section>
+
+
+<div class="games">
+
+
+<!-- ================= SLOTS ================= -->
+
+<section class="game">
+
+    <h2>🎰 Neon Slots</h2>
+
+    <div class="slots">
+
+        <div class="slot" id="slot1">
+            🍒
+        </div>
+
+        <div class="slot" id="slot2">
+            💎
+        </div>
+
+        <div class="slot" id="slot3">
+            7️⃣
+        </div>
+
+    </div>
+
+
+    <div class="controls">
+
+        <input
+            id="slotBet"
+            type="number"
+            min="1"
+            value="100">
+
+        <button onclick="spinSlots()">
+            🎰 КРУТИТЬ
+        </button>
+
+    </div>
+
+
+    <div
+        class="message"
+        id="slotMessage">
+    </div>
+
+</section>
+
+
+<!-- ================= ROULETTE ================= -->
+
+<section class="game">
+
+    <h2>🎡 Roulette</h2>
+
+    <div
+        class="roulette"
+        id="wheel">
+
+        <div class="roulette-center">
+            ?
+        </div>
+
+    </div>
+
+
+    <div class="bet-buttons">
+
+        <button
+            class="red"
+            onclick="selectColor('red')">
+            🔴 Красное
+        </button>
+
+        <button
+            class="black"
+            onclick="selectColor('black')">
+            ⚫ Чёрное
+        </button>
+
+    </div>
+
+
+    <div class="controls">
+
+        <input
+            id="rouletteBet"
+            type="number"
+            min="1"
+            value="100">
+
+        <button onclick="spinRoulette()">
+            🎡 КРУТИТЬ
+        </button>
+
+    </div>
+
+
+    <div
+        class="message"
+        id="rouletteMessage">
+        Выберите цвет
+    </div>
+
+</section>
+
+</div>
+
+
+<!-- ================= HISTORY ================= -->
+
+<section class="history">
+
+    <h3>📜 История</h3>
+
+    <div id="history">
+
+        <div class="history-item">
+            Добро пожаловать в Royal Neon!
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+    ДЕМО-ВЕРСИЯ • Только виртуальные кредиты
+    • Реальные деньги не используются
+
+</footer>
+
+
+<script>
+
+/* ==========================================
+   AUDIO ENGINE
+========================================== */
+
+let audioContext = null;
+
+let soundEnabled = true;
+
+function getAudio() {
+
+    if (!audioContext) {
+
+        audioContext =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+    }
+
+    if (audioContext.state === "suspended") {
+        audioContext.resume();
+    }
+
+    return audioContext;
+}
+
+
+function tone(
+    frequency,
+    duration,
+    volume = 0.08,
+    type = "sine"
+) {
+
+    if (!soundEnabled) return;
+
+    const ctx = getAudio();
+
+    const oscillator =
+        ctx.createOscillator();
+
+    const gain =
+        ctx.createGain();
+
+    oscillator.type = type;
+
+    oscillator.frequency.setValueAtTime(
+        frequency,
+        ctx.currentTime
+    );
+
+    gain.gain.setValueAtTime(
+        volume,
+        ctx.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        ctx.currentTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start();
+
+    oscillator.stop(
+        ctx.currentTime + duration
+    );
+}
+
+
+/* CLICK */
+
+function clickSound() {
+
+    tone(
+        650,
+        0.08,
+        0.12,
+        "square"
+    );
+
+    setTimeout(() => {
+        tone(
+            900,
+            0.07,
+            0.08,
+            "square"
+        );
+    }, 50);
+}
+
+
+/* SLOT SPIN */
+
+function spinSound() {
+
+    tone(
+        160,
+        0.11,
+        0.06,
+        "sawtooth"
+    );
+}
+
+
+/* STOP */
+
+function stopSound() {
+
+    tone(
+        300,
+        0.08,
+        0.1,
+        "square"
+    );
+
+    setTimeout(() => {
+
+        tone(
+            500,
+            0.09,
+            0.08,
+            "square"
+        );
+
+    }, 70);
+}
+
+
+/* WIN */
+
+function winSound() {
+
+    if (!soundEnabled) return;
+
+    const notes = [
+        523,
+        659,
+        784,
+        1046
+    ];
+
+    notes.forEach((note, index) => {
+
+        setTimeout(() => {
+
+            tone(
+                note,
+                0.35,
+                0.13,
+                "sine"
+            );
+
+        }, index * 120);
+
+    });
+
+}
+
+
+/* ROULETTE TICK */
+
+function rouletteTick() {
+
+    tone(
+        220 + Math.random() * 100,
+        0.06,
+        0.06,
+        "square"
+    );
+
+}
+
+
+/* SOUND ON/OFF */
+
+function toggleSound() {
+
+    soundEnabled = !soundEnabled;
+
+    document.getElementById(
+        "soundButton"
+    ).textContent =
+        soundEnabled ? "🔊" : "🔇";
+
+}
+
+
+/* ==========================================
+   GAME
+========================================== */
+
+let balance = 10000;
+
+let selectedColor = null;
+
+const symbols = [
+    "🍒",
+    "🍋",
+    "🍊",
+    "💎",
+    "⭐",
+    "7️⃣"
+];
+
+
+function updateBalance() {
+
+    document.getElementById(
+        "balance"
+    ).textContent =
+        balance.toLocaleString("ru-RU");
+
+}
+
+
+function history(text) {
+
+    const box =
+        document.getElementById("history");
+
+    const item =
+        document.createElement("div");
+
+    item.className =
+        "history-item";
+
+    item.textContent = text;
+
+    box.prepend(item);
+
+}
+
+
+/* ==========================================
+   SLOTS
+========================================== */
+
+function spinSlots() {
+
+    clickSound();
+
+    const bet =
+        Number(
+            document.getElementById(
+                "slotBet"
+            ).value
+        );
+
+    if (
+        !Number.isFinite(bet) ||
+        bet <= 0
+    ) {
+
+        document.getElementById(
+            "slotMessage"
+        ).textContent =
+            "Введите ставку";
+
+        return;
+
+    }
+
+
+    if (bet > balance) {
+
+        document.getElementById(
+            "slotMessage"
+        ).textContent =
+            "Недостаточно кредитов";
+
+        return;
+
+    }
+
+
+    balance -= bet;
+
+    updateBalance();
+
+
+    const reels = [
+
+        document.getElementById("slot1"),
+
+        document.getElementById("slot2"),
+
+        document.getElementById("slot3")
+
+    ];
+
+
+    let counter = 0;
+
+
+    const timer =
+        setInterval(() => {
+
+            spinSound();
+
+            reels.forEach(
+                reel => {
+
+                    reel.textContent =
+                        symbols[
+                            Math.floor(
+                                Math.random()
+                                * symbols.length
+                            )
+                        ];
+
+                }
+            );
+
+
+            counter++;
+
+
+            if (counter >= 20) {
+
+                clearInterval(timer);
+
+                stopSound();
+
+
+                const result =
+                    reels.map(
+                        reel =>
+                            reel.textContent
+                    );
+
+
+                let multiplier = 0;
+
+
+                if (
+                    result[0] === result[1] &&
+                    result[1] === result[2]
+                ) {
+
+                    multiplier =
+                        result[0] === "7️⃣"
+                            ? 10
+                            : 5;
+
+                }
+
+                else if (
+                    result[0] === result[1] ||
+                    result[1] === result[2] ||
+                    result[0] === result[2]
+                ) {
+
+                    multiplier = 2;
+
+                }
+
+
+                const win =
+                    bet * multiplier;
+
+
+                if (win > 0) {
+
+                    balance += win;
+
+                    updateBalance();
+
+                    winSound();
+
+
+                    reels.forEach(
+                        reel =>
+                            reel.classList.add(
+                                "win"
+                            )
+                    );
+
+
+                    setTimeout(() => {
+
+                        reels.forEach(
+                            reel =>
+                                reel.classList.remove(
+                                    "win"
+                                )
+                        );
+
+                    }, 1800);
+
+
+                    document.getElementById(
+                        "slotMessage"
+                    ).textContent =
+                        `🎉 ВЫИГРЫШ ${win.toLocaleString("ru-RU")} 🪙`;
+
+
+                    history(
+                        `🎰 Слоты: +${win.toLocaleString("ru-RU")} 🪙`
+                    );
+
+                }
+
+                else {
+
+                    document.getElementById(
+                        "slotMessage"
+                    ).textContent =
+                        "Попробуйте ещё раз";
+
+                    history(
+                        `🎰 Слоты: −${bet.toLocaleString("ru-RU")} 🪙`
+                    );
+
+                }
+
+            }
+
+        }, 100);
+
+}
+
+
+/* ==========================================
+   ROULETTE
+========================================== */
+
+function selectColor(color) {
+
+    selectedColor = color;
+
+    document.getElementById(
+        "rouletteMessage"
+    ).textContent =
+        color === "red"
+            ? "🔴 Выбрано красное"
+            : "⚫ Выбрано чёрное";
+
+}
+
+
+function spinRoulette() {
+
+    clickSound();
+
+
+    if (!selectedColor) {
+
+        document.getElementById(
+            "rouletteMessage"
+        ).textContent =
+            "Сначала выберите цвет";
+
+        return;
+
+    }
+
+
+    const bet =
+        Number(
+            document.getElementById(
+                "rouletteBet"
+            ).value
+        );
+
+
+    if (
+        !Number.isFinite(bet) ||
+        bet <= 0
+    ) {
+
+        document.getElementById(
+            "rouletteMessage"
+        ).textContent =
+            "Введите ставку";
+
+        return;
+
+    }
+
+
+    if (bet > balance) {
+
+        document.getElementById(
+            "rouletteMessage"
+        ).textContent =
+            "Недостаточно кредитов";
+
+        return;
+
+    }
+
+
+    balance -= bet;
+
+    updateBalance();
+
+
+    const wheel =
+        document.getElementById(
+            "wheel"
+        );
+
+
+    const rotation =
+        1440 +
+        Math.floor(
+            Math.random() * 720
+        );
+
+
+    wheel.style.transform =
+        `rotate(${rotation}deg)`;
+
+
+    let ticks = 0;
+
+
+    const tickTimer =
+        setInterval(() => {
+
+            rouletteTick();
+
+            ticks++;
+
+            if (ticks >= 15) {
+
+                clearInterval(
+                    tickTimer
+                );
+
+            }
+
+        }, 210);
+
+
+    setTimeout(() => {
+
+
+        const number =
+            Math.floor(
+                Math.random() * 37
+            );
+
+
+        const color =
+            number === 0
+                ? "green"
+                : number % 2 === 0
+                    ? "black"
+                    : "red";
+
+
+        if (color === selectedColor) {
+
+            const win =
+                bet * 2;
+
+
+            balance += win;
+
+            updateBalance();
+
+            winSound();
+
+
+            document.getElementById(
+                "rouletteMessage"
+            ).textContent =
+                `🎉 Выпало ${number} — +${win} 🪙`;
+
+
+            history(
+                `🎡 Рулетка: +${win.toLocaleString("ru-RU")} 🪙`
+            );
+
+        }
+
+        else {
+
+            document.getElementById(
+                "rouletteMessage"
+            ).textContent =
+                `Выпало ${number}. Ставка проиграла.`;
+
+            history(
+                `🎡 Рулетка: −${bet.toLocaleString("ru-RU")} 🪙`
+            );
+
+        }
+
+
+    }, 3200);
+
+}
+
+
+updateBalance();
+
+</script>
+
+</body>
+</html>
