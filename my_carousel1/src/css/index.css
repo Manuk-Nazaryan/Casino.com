@@ -1,0 +1,127 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Lato, sans-serif;
+  color: rgb(29, 28, 28);
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+div.container {
+  display: flex;
+  width: 90vw;
+  height: 80vh;
+}
+
+div.carousel-item {
+  flex-grow: 0.6;
+  /* same as flex:0.5 */
+  margin: 10px;
+  border-radius: 10px;
+  background: url(../images/1.jpg) no-repeat center grey;
+  background-size: cover;
+  position: relative;
+  transition: flex ease-in-out 0.5s;
+  cursor: pointer;
+}
+
+div.carousel-item.active {
+  flex: 5;
+  cursor: default;
+}
+
+div.carousel-item.active h3 {
+  opacity: 1;
+  background-color: rgb(243, 215, 204, 0.5);
+  padding: 4px 10px;
+  border-radius: 5px;
+  transition: opacity 0.7s ease-in;
+}
+
+div.carousel-item h3 {
+  position: absolute;
+  bottom: 0px;
+  text-align: center;
+  left: 20px;
+  opacity: 0;
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+div.carousel-item:nth-of-type(2) {
+  background-image: url(../images/2.jpg);
+}
+
+div.carousel-item:nth-of-type(3) {
+  background-image: url(../images/3.jpg);
+}
+
+div.carousel-item:nth-of-type(4) {
+  background-image: url(../images/4.jpg);
+}
+
+div.carousel-item:nth-of-type(5) {
+  background-image: url(../images/5.jpg);
+}
+
+/***** Indicators ******/
+.controls {
+  width: 40vw;
+  max-width: 450px;
+  margin: 15px auto;
+}
+
+.indicators {
+  display: flex;
+  justify-content: space-between;
+}
+
+.carousel_ind {
+  background-color: rgb(245, 236, 233);
+  margin: 10px;
+  flex-basis: 50px;
+  height: 15px;
+  border-radius: 3px;
+  transition: ease-in 0.7s;
+  box-shadow: 1px 1px 3px 3px rgb(245, 236, 233);
+  cursor: pointer;
+}
+
+.carousel_ind.active {
+  background-color: rgb(243, 215, 204);
+  transition: background-color ease 1s;
+}
+
+.line {
+  height: 3px;
+  width: 100%-10px;
+  margin: -19px 10px;
+  position: relative;
+}
+
+.main-line,
+.progress-line {
+  position: absolute;
+  background-color: rgb(245, 236, 233);
+  width: 100%;
+  z-index: -2;
+  height: 100%;
+}
+
+.progress-line {
+  background-color: rgb(243, 215, 204);
+  z-index: -1;
+  width: 0%;
+  transition: ease-out 1s;
+}
+
+.active-state {
+  box-shadow: 1px 1px 2px 3px rgb(236, 189, 170);
+  background-color: rgb(236, 189, 170);
+  transition: all ease-out 1.3s;
+}
